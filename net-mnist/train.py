@@ -12,6 +12,7 @@ from torch.utils.tensorboard import SummaryWriter
 from network import *
 from utils import *
 from imshow import *
+from GC import *
 
 # Parser arguments
 parser = argparse.ArgumentParser(description='Test different optimizers to'
@@ -38,7 +39,7 @@ parser.add_argument('--network', '--net',
                     help='pick a specific network to train'
                          '(default: "linear")')
 parser.add_argument('--optimizer', '--o',
-                    default='adam', choices=['adam', 'sgd', 'lbfgs'],
+                    default='adam', choices=['adam', 'sgd', 'lbfgs', 'sgd_gc'],
                     help='pick a specific optimizer (default: "adam")')
 parser.add_argument('--learning-rate', '--lr',
                     type=float, default=1e-3, metavar='N',
@@ -139,6 +140,10 @@ def train(trainset, validset):
 
     elif args.optimizer == 'lbfgs':
         args.optimizer = optim.LBFGS(args.network.parameters())
+
+    elif args.optimizer == 'sgd_gc':
+        args.optimizer = SGD_GC(args.network.parameters(),
+                                lr=args.learning_rate, momentum=0.9)
 
     # Set loss function
     args.criterion = torch.nn.CrossEntropyLoss()
