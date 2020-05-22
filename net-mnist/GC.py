@@ -1,5 +1,5 @@
 import torch
-from torch.optim import Optimizer
+from torch.optim.optimizer import Optimizer, required
 
 
 class SGD_GC(Optimizer):
@@ -63,6 +63,9 @@ class SGD_GC(Optimizer):
                 d_p = p.grad
                 if weight_decay != 0:
                     d_p = d_p.add(p, alpha=weight_decay)
+
+                d_p.add_(-d_p.mean(dim = tuple(range(1,len(list(d_p.size())))), keepdim = True))
+
                 if momentum != 0:
                     param_state = self.state[p]
                     if 'momentum_buffer' not in param_state:
