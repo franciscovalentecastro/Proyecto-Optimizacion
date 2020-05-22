@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import torch
 import warnings
+import torchvision
+
 from datetime import datetime
+from torchvision import transforms
 from sklearn.exceptions import UndefinedMetricWarning
-import matplotlib.image as mpimg
 
 # Import network
 from network import *

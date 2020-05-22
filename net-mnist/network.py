@@ -10,7 +10,7 @@ class LinearClassifier(nn.Module):
         self.device = args.device
         self.batch_size = args.batch_size
         self.input_dimension = args.input_dimension
-        self.input_dimension = args.hidden_dimension
+        self.hidden_dimension = args.hidden_dimension
         self.output_dimension = args.output_dimension
 
         # Encoder
