@@ -292,6 +292,8 @@ def main():
     # Create network
     if args.network == 'linear':
         network = LinearClassifier(args)
+    elif args.network == 'convolutional':
+        network = ConvolutionalClassifier(args)
 
     # Send networks to device
     args.network = network.to(args.device)
