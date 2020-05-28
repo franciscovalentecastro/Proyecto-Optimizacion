@@ -20,7 +20,7 @@ class LinearClassifier(nn.Module):
     def forward(self, x):
         # Pass through layers
         x1 = F.relu(self.linear_1(x))
-        x2 = F.softmax(self.linear_2(x1), dim=0)
+        x2 = self.linear_2(x1)
 
         return x2
 
@@ -45,24 +45,17 @@ class ConvolutionalClassifier(nn.Module):
                                   self.output_dimension)
 
     def forward(self, x):
-        # print(x.shape)
         # Reshape into image
         x = x.view(self.batch_size, 1,
                    self.image_dimension,
                    self.image_dimension)
-        # print(x.shape)
 
         # Pass through layers
         x1 = F.relu(self.conv_1(x))
-        # print(x1.shape)
         x2 = F.relu(self.conv_2(x1))
-        # print(x2.shape)
 
         # Flatten
         x2 = x2.view(self.batch_size, -1)
-
-        # print(x2.shape)
-        x3 = F.softmax(self.linear_1(x2), dim=0)
-        # print(x3.shape)
+        x3 = self.linear_1(x2)
 
         return x3

@@ -39,7 +39,8 @@ parser.add_argument('--network', '--net',
                     help='pick a specific network to train'
                          '(default: "linear")')
 parser.add_argument('--optimizer', '--o',
-                    default='adam', choices=['adam', 'sgd', 'lbfgs', 'sgd_gc', 'adam_gc'],
+                    default='adam', choices=['adam', 'sgd', 'lbfgs',
+                                             'sgd_gc', 'adam_gc'],
                     help='pick a specific optimizer (default: "adam")')
 parser.add_argument('--learning-rate', '--lr',
                     type=float, default=1e-3, metavar='N',
@@ -83,11 +84,11 @@ def batch_status(batch_idx, inputs, outputs,
 
     # Write tensorboard statistics
     args.writer.add_scalar('Train/loss', loss, global_step)
-    #args.writer.add_scalar('Test/acc', val_acc, global_step)
+    # args.writer.add_scalar('Test/acc', val_acc, global_step)
 
     # print every args.log_interval of batches
     if global_step % args.log_interval == 0:
-        # Add to tensorboar
+        # Add to tensorboard
         # add_tensorboard(inputs, targets, outputs, global_step, name='Train')
 
         # Process current checkpoint
@@ -126,8 +127,12 @@ def train(trainset, validset):
 
     if args.plot:
         # Print elements of dataset
-        # Falta implementar
-        pass
+        dataiter = iter(train_loader)
+        images, _ = dataiter.next()
+
+        grid = torchvision.utils.make_grid(images)
+        imshow(grid)
+        args.writer.add_image('sample-train', grid)
 
     # Define optimizer
     if args.optimizer == 'adam':
@@ -146,7 +151,7 @@ def train(trainset, validset):
 
     if args.optimizer == 'adam_gc':
         args.optimizer = Adam_GC(args.network.parameters(),
-                                    lr=args.learning_rate, betas=(.5, .999))
+                                 lr=args.learning_rate, betas=(.5, .999))
 
     # Set loss function
     args.criterion = torch.nn.CrossEntropyLoss()
@@ -176,15 +181,16 @@ def train(trainset, validset):
             labels = labels.to(args.device)
 
             # Calculate gradients and update
-            #with autograd.detect_anomaly():
-                # zero the parameter gradients
+            # with autograd.detect_anomaly():
+            # zero the parameter gradients
             args.optimizer.zero_grad()
 
-                # forward + backward + optimize
+            # forward + backward + optimize
             outputs = args.network(inputs)
             loss = args.criterion(outputs, labels)
             loss.backward()
             args.optimizer.step()
+
             # Batch status
             batch_status(batch_idx, inputs, outputs, epoch,
                          train_loader, loss, validset)
@@ -209,47 +215,58 @@ def validate(validset, print_info=False, log_info=False, global_step=0):
     if print_info:
         print('Started Validation')
 
+    # Set loss function
+    args.criterion = torch.nn.CrossEntropyLoss()
+
+    # Loop through dataset
     run_loss = 0
-    correct = 0
-    total = 0
+    trgts = torch.tensor([0], dtype=torch.int)
+    preds = torch.tensor([0], dtype=torch.int)
     with torch.no_grad():
         for batch_idx, batch in enumerate(valid_loader, 1):
             # Unpack batch
-            inputs, labels = batch
+            inputs, targets = batch
 
             # Reshape tensors
             inputs = inputs.view(args.batch_size, -1)
 
             # Send to device
             inputs = inputs.to(args.device)
-            labels = labels.to(args.device)
+            targets = targets.to(args.device)
 
+            # forward
             args.network.eval()
-
             outputs = args.network(inputs)
-            loss = args.criterion(outputs, labels)
-            run_loss += loss.item()
+
+            # calculate loss
+            run_loss += args.criterion(outputs, targets).item()
 
             _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
 
-            # if batch_idx == 1:
-            #     # Add to tensorboard
-            #     add_tensorboard(inputs, targets, outputs,
-            #                     global_step, name='Valid')
+            # concatenate prediction and truth
+            preds = torch.cat((preds, predicted.reshape(-1).int().cpu()))
+            trgts = torch.cat((trgts, targets.reshape(-1).int().cpu()))
 
-    acc = correct / total
+    # Calculate metrics
+    met = calculate_metrics(trgts, preds, args)
 
     if log_info:
-        args.writer.add_scalar('Valid/Acc',
-                               acc,
-                               global_step)
-        args.writer.add_scalar('Valid/loss',
+        args.writer.add_scalar('Validation/accuracy',
+                               met['acc'], global_step)
+        args.writer.add_scalar('Validation/balanced_accuracy',
+                               met['bacc'], global_step)
+        args.writer.add_scalar('Validation/precision',
+                               met['prec'], global_step)
+        args.writer.add_scalar('Validation/recall',
+                               met['rec'], global_step)
+        args.writer.add_scalar('Validation/f1',
+                               met['f1'], global_step)
+        args.writer.add_scalar('Validation/loss',
                                run_loss / len(valid_loader),
                                global_step)
 
-    return acc
+    return met['acc']
+
 
 def main():
     # Printing parameters
@@ -316,13 +333,13 @@ def main():
         restore_checkpoint(args)
 
         # Predict test
-        # predict(tst)
+        validate(tst)
     else:
         # Train network
         train(trn, tst)
 
-        # Generate samples
-        # predict(tst)
+        # Predict test
+        validate(tst)
 
     # (compatibility issues) Add hparams with metrics to tensorboard
     # args.writer.add_hparams(args.hparams, {'metrics': 0})
