@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 import torch
 import warnings
+import torchvision
+
+from sklearn import metrics
 from datetime import datetime
+from torchvision import transforms
 from sklearn.exceptions import UndefinedMetricWarning
-import matplotlib.image as mpimg
 
 # Import network
 from network import *
@@ -125,39 +128,9 @@ def create_run_name(args):
     return run
 
 
-def add_tensorboard(inputs, targets, outputs, global_step, name='Train'):
-    # Make targets and output slices
-    trgt_slice = targets.sum(dim=1, keepdim=True)
-    otpt_slice = outputs.sum(dim=1, keepdim=True)
-
-    trgt_htmp = heatmap(trgt_slice).to(args.device)
-    otpt_htmp = heatmap(otpt_slice).to(args.device)
-
-    # Make grids
-    image_grid = make_grid(inputs, nrow=4, padding=2, pad_value=1)
-    trgt_slice_grid = make_grid(trgt_slice, nrow=4, padding=2, pad_value=1)
-    otpt_slice_grid = make_grid(otpt_slice, nrow=4, padding=2, pad_value=1)
-    trgt_htmp_grid = make_grid(trgt_htmp, nrow=4, padding=2, pad_value=1)
-    otpt_htmp_grid = make_grid(otpt_htmp, nrow=4, padding=2, pad_value=1)
-
-    # Create Heatmaps grid
-    args.writer.add_image('{}/gt'.format(name), trgt_htmp_grid, global_step)
-    args.writer.add_image('{}/gt_image'.format(name),
-                          image_grid + trgt_slice_grid, global_step)
-    args.writer.add_image('{}/pred'.format(name), otpt_htmp_grid, global_step)
-    args.writer.add_image('{}/pred_image'.format(name),
-                          image_grid + otpt_slice_grid, global_step)
-
-
 def calculate_metrics(targets, predictions, args, report=True):
     # Calculate metrics
     avg = 'macro'
-
-    # remove unwanted tags
-    for idx in range(4):
-        dif = targets != idx
-        targets = targets[dif]
-        predictions = predictions[dif]
 
     # ignore scikit-learn metrics warnings
     with warnings.catch_warnings():
@@ -174,8 +147,8 @@ def calculate_metrics(targets, predictions, args, report=True):
     # Classification report
     if report:
         # Labels to predict and names
-        labels = range(4, 17)
-        names = args.TAG.vocab.itos[4:]
+        labels = list(range(0, 10))
+        names = [str(elem) for elem in labels]
 
         # Print classification report
         print(metrics.classification_report(targets, predictions,
