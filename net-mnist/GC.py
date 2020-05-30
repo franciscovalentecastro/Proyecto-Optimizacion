@@ -65,6 +65,7 @@ class SGD_GC(Optimizer):
                 if weight_decay != 0:
                     d_p = d_p.add(p, alpha=weight_decay)
 
+                # Gradient Centralization step
                 d_p.add_(-d_p.mean(dim = tuple(range(1,len(list(d_p.size())))), keepdim = True))
 
                 if momentum != 0:
@@ -153,6 +154,7 @@ class Adam_GC(Optimizer):
 
                 state = self.state[p]
 
+                # Gradient Centralization step
                 grad.add_(-grad.mean(dim = tuple(range(1,len(list(grad.size())))), keepdim = True))
 
                 # State initialization
