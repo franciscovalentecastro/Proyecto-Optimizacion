@@ -122,7 +122,7 @@ class Adam_GC(Optimizer):
             raise ValueError("Invalid weight_decay value: {}".format(weight_decay))
         defaults = dict(lr=lr, betas=betas, eps=eps,
                         weight_decay=weight_decay, amsgrad=amsgrad)
-        super(Adam, self).__init__(params, defaults)
+        super(Adam_GC, self).__init__(params, defaults)
 
     def __setstate__(self, state):
         super(Adam_GC, self).__setstate__(state)
