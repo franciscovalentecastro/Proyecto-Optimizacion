@@ -41,7 +41,8 @@ class ConvolutionalClassifier(nn.Module):
         # Classifier
         self.conv_1 = nn.Conv2d(1, 8, kernel_size=5)
         self.conv_2 = nn.Conv2d(8, 16, kernel_size=5)
-        self.linear_1 = nn.Linear(16 * (self.image_dimension - 8) ** 2,
+        self.linear_1 = nn.Linear(self.batch_size *
+                                  (self.image_dimension - 8) ** 2,
                                   self.output_dimension)
 
     def forward(self, x):
