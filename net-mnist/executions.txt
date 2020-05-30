@@ -4,8 +4,8 @@ python train.py --e 2 --li 100 --d cpu --net linear --data mnist --optimizer lbf
 python train.py --e 2 --li 100 --d cpu --net linear --data mnist --optimizer sgd_gc
 python train.py --e 2 --li 100 --d cpu --net linear --data mnist --optimizer adam_gc
 
-python train.py --e 2 --li 100 --d cpu --net convolutional --data mnist --optimizer sgd
-python train.py --e 2 --li 100 --d cpu --net convolutional --data mnist --optimizer adam
-python train.py --e 2 --li 100 --d cpu --net convolutional --data mnist --optimizer lbfgs
-python train.py --e 2 --li 100 --d cpu --net convolutional --data mnist --optimizer sgd_gc
-python train.py --e 2 --li 100 --d cpu --net convolutional --data mnist --optimizer adam_gc
+python train.py --e 2 --b 32 --li 100 --d cpu --net convolutional --data mnist --optimizer sgd
+python train.py --e 2 --b 32 --li 100 --d cpu --net convolutional --data mnist --optimizer adam
+python train.py --e 2 --b 32 --li 100 --d cpu --net convolutional --data mnist --optimizer lbfgs
+python train.py --e 2 --b 32 --li 100 --d cpu --net convolutional --data mnist --optimizer sgd_gc
+python train.py --e 2 --b 32 --li 100 --d cpu --net convolutional --data mnist --optimizer adam_gc
