@@ -211,7 +211,7 @@ def validate(validset, print_info=False, log_info=False, global_step=0):
     valid_loader = torch.utils.data.DataLoader(validset,
                                                batch_size=args.batch_size,
                                                shuffle=True,
-                                               drop_last=False)
+                                               drop_last=True)
     if print_info:
         print('Started Validation')
 
