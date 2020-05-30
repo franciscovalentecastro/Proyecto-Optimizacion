@@ -84,7 +84,9 @@ def batch_status(batch_idx, inputs, outputs,
 
     # Write tensorboard statistics
     args.writer.add_scalar('Train/loss', loss, global_step)
-    # args.writer.add_scalar('Test/acc', val_acc, global_step)
+    args.writer.add_histogram('linear_1.weight',
+                              args.network.linear_1.weight,
+                              global_step)
 
     # print every args.log_interval of batches
     if global_step % args.log_interval == 0:
